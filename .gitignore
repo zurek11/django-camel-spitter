@@ -1,0 +1,6 @@
+.idea/
+.pytest_cache
+django-camel-spitter.egg-info
+build
+dist
+venv
