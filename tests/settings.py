@@ -21,6 +21,13 @@ DATABASES = {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': DATABASE_PATH,
     },
+    'logging': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': DATABASE_PATH,
+        'TEST': {
+            'MIRROR': 'default',
+        }
+    },
 }
 
 MIDDLEWARE = []

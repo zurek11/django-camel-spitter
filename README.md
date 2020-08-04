@@ -39,19 +39,32 @@ INSTALLED_APPS = (
 )
 ```
 
-#### 2. Creating a log model:
+#### 2. Adding additional `logging` db connection to `settings.DATABASES`:
 
-Only importance is inheritance from `camel_spitter.models.BaseLogModel`.
+> This additional connection is needed for handling DB transaction atomicity. 
+> Exception without own connection cannot create DB log, when rollback was made.
+> Transactions in django are default handled on default DB connection.
+> So rollback will stop default connection execution, but logging connection not.
 
 ```python
-from camel_spitter.models import BaseLogModel
-
-
-class BasicLogEntry(BaseLogModel):
-    class Meta:
-        app_label = 'tests'
-        db_table = 'log_entries'
-        default_permissions = ()
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'HOST': os.getenv('DATABASE_HOST'),
+        'PORT': os.getenv('DATABASE_PORT', 5432),
+        'NAME': os.getenv('DATABASE_NAME'),
+        'USER': os.getenv('DATABASE_USER'),
+        'PASSWORD': os.getenv('DATABASE_PASSWORD', None)
+    },
+    'logging': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'HOST': os.getenv('DATABASE_HOST'),
+        'PORT': os.getenv('DATABASE_PORT', 5432),
+        'NAME': os.getenv('DATABASE_NAME'),
+        'USER': os.getenv('DATABASE_USER'),
+        'PASSWORD': os.getenv('DATABASE_PASSWORD', None)
+    }   
+}
 ```
 
 #### 3. Adding `model`, `filter` and `handler` to `settings.LOGGING`:
@@ -80,6 +93,21 @@ LOGGING = {
         }
     }
 }
+```
+
+#### 4. Creating a log model:
+
+Only importance is inheritance from `camel_spitter.models.BaseLogModel`.
+
+```python
+from camel_spitter.models import BaseLogModel
+
+
+class BasicLogEntry(BaseLogModel):
+    class Meta:
+        app_label = 'tests'
+        db_table = 'log_entries'
+        default_permissions = ()
 ```
 
 ## Example
@@ -127,6 +155,29 @@ import logging
 logging.getLogger('logger').error('Foo Bar Error', extra={
     'request_body': json.loads(request.body), 'user_name': 'Foo Bar'
 })
+```
+
+## Important notes
+
+#### Testing with pytest and file DB
+
+> When tests are made with pytest library and file DB like SQLite,
+> tests will make two separate database files from specified connections even though path and engine are the same.
+> So retrieving log is needed to be executed with using like `BasicLogEntry.objects.using('logging').get(message='Foo Bar')`.
+> To avoid this issue you can specify mirror database in test settings.
+
+```python
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': DB_PATH,
+    },
+    'logging': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': DB_PATH,
+        'TEST': {
+            'MIRROR': 'default',
+        }
+    },
 ```
 
 ---

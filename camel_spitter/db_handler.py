@@ -27,6 +27,6 @@ class DBHandler(Handler):
                 data[field.name] = getattr(record, 'msg')
 
         try:
-            self.model.objects.create(**data)
+            self.model.objects.using('logging').create(**data)
         except IntegrityError as e:
             raise e
