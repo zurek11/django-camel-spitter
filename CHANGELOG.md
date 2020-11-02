@@ -9,3 +9,7 @@
 ## 0.3.0 : 2020-08-04
 
 - DB logging is successful even if it is wrapped in a transaction, which made rollback.
+
+## 0.3.1 : 2020-11-02
+
+- Changed django version requirement from "==3.0.*" to ">=2.0"

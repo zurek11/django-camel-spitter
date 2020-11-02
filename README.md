@@ -41,7 +41,7 @@ INSTALLED_APPS = (
 
 #### 2. Adding additional `logging` db connection to `settings.DATABASES`:
 
-> This additional connection is needed for handling DB transaction atomicity. 
+> This additional connection is needed for handling DB transaction atomicity.
 > Exception without own connection cannot create DB log, when rollback was made.
 > Transactions in django are default handled on default DB connection.
 > So rollback will stop default connection execution, but logging connection not.
@@ -63,7 +63,7 @@ DATABASES = {
         'NAME': os.getenv('DATABASE_NAME'),
         'USER': os.getenv('DATABASE_USER'),
         'PASSWORD': os.getenv('DATABASE_PASSWORD', None)
-    }   
+    }
 }
 ```
 
@@ -135,15 +135,14 @@ If you like to log some additional data, for example: [request.body, user_name],
 ```python
 from camel_spitter.models import BaseLogModel
 from django.db import models
-from django.contrib.postgres.fields import JSONField
 
 class ExtendedLogEntry(BaseLogModel):
     class Meta:
         app_label = 'tests'
         db_table = 'extended_log_entries'
         default_permissions = ()
-    
-    request_body = JSONField(null=True)
+
+    request_body = models.JSONField(null=True)
     user_name = models.CharField(max_length=100, null=True)
 ```
 
