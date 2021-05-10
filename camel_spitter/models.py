@@ -5,6 +5,7 @@ class BaseLogModel(models.Model):
     class Meta:
         abstract = True
 
+    id = models.AutoField(primary_key=True)
     level = models.CharField(max_length=50, null=False, default='')
     module = models.CharField(max_length=50, null=False, default='')
     function = models.CharField(max_length=50, null=False, default='')
